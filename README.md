@@ -34,3 +34,12 @@ is unsubscribed. Once there are no more subscriptions we will remove the client 
 Also since we are handling our async through streams we can do the same for our commands. We create a source from an
 [EventEmmiter](https://github.com/Jhorlin/help-tcp/blob/master/lib/HelpTcpClient.js#L44) and when we create a client we
 [subscribe](https://github.com/Jhorlin/help-tcp/blob/master/lib/HelpTcpClient.js#L61) to the event source and pump messages into that client.
+
+
+###Thoughts
+I chose to set a timeout on the command [source/observable](https://github.com/Jhorlin/help-tcp/blob/master/lib/HelpTcpClient.js#L110) so that
+there are no lingering requests since the cli waits for a selecton before you can chose a different one. This limitation is just for
+cli simplicity. Since each command is it own subscription based on a the tcpSource each subscription monitors the same tcp source but
+the [filter](https://github.com/Jhorlin/help-tcp/blob/master/lib/HelpTcpClient.js#L105) is not shared. This solution can multiplex many commands
+from one tcp connection and each command will have its own error, depending on how far down stream that error is. Parsing errors will only effect that
+command while tcp errors will propagate to all commands. Also each command can complete in any order irrelevant of request order.
