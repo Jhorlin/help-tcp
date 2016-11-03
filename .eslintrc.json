@@ -1,0 +1,17 @@
+{
+    "plugins": ["node", "mocha"],
+    "extends": ["eslint:recommended", "plugin:node/recommended"],
+    "rules": {
+        "node/exports-style": ["error", "module.exports"],
+        "mocha/no-exclusive-tests": "error"
+    },
+    "env": {
+        "node": true
+    },
+    "globals": {
+        "describe": true,
+        "it": true,
+        "before": true,
+        "after": true
+    }
+}
