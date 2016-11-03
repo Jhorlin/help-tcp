@@ -7,8 +7,7 @@ describe('HelpTcpClient Class', () => {
   it('should throw an error with invalid arguments', () => {
     assert.throws(() => {
       new HelpTcpClient();
-    }, errors.InvalidArguments
-    );
+    }, errors.InvalidArguments);
   });
 
   it('should create an instance', () => {
@@ -293,6 +292,9 @@ describe('HelpTcpClient Class', () => {
     it('should close a connection', () => {
       const instance = new HelpTcpClient('localhost', '1', 'hb');
       instance.close();
+      assert.throws(() => {
+        instance.sendCommand('time');
+      }, errors.ClientClosed);
     })
   })
 });
