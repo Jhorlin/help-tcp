@@ -27,11 +27,13 @@ describe('HelpTcpClient Class', () => {
     assert.equal(false, HelpTcpClient.isValidCommand('invalid'));
   });
 
-  it('should throw an when send command is an invalid command', () => {
-    assert.throws(() => {
-      const instance = new HelpTcpClient('localhost', '3000', 'jhorlin');
-      instance.sendCommand('invalid');
-    }, errors.InvalidCommand);
+  it('should reject when send command is an invalid command', () => {
+    const instance = new HelpTcpClient('localhost', '3000', 'jhorlin');
+    instance.sendCommand('invalid')
+    .then(() => {
+      assert.fail('should throw');
+    })
+    .catch(errors.InvalidCommand, () => {});
   });
 
   describe('good response', () => {
@@ -63,25 +65,19 @@ describe('HelpTcpClient Class', () => {
       mitm.disable();
     });
 
-    it('should get back a count response', (done) => {
+    it('should get back a count response', () => {
       const client = new HelpTcpClient('localhost', '1', 'jhorlin');
-      client.sendCommand('count')
-        .subscribe((response) => {
+      return client.sendCommand('count')
+        .then((response) => {
           assert.ok(response);
-          done();
-        }, (err) => {
-          done(err);
         });
     });
 
-    it('should get back a time response', (done) => {
+    it('should get back a time response', () => {
       const client = new HelpTcpClient('localhost', '1', 'jhorlin');
-      client.sendCommand('time')
-        .subscribe((response) => {
+      return client.sendCommand('time')
+        .then((response) => {
           assert.ok(response);
-          done();
-        }, (err) => {
-          done(err);
         });
     })
   });
@@ -116,8 +112,10 @@ describe('HelpTcpClient Class', () => {
     it('should get back a count response', (done) => {
       const client = new HelpTcpClient('localhost', '1', 'jhorlin');
       client.sendCommand('count')
-        .subscribe(() => {
-        }, (err) => {
+        .then(() => {
+          assert.fail('should throw');
+        })
+      .catch((err) => {
           assert.ok(err);
           done();
         });
@@ -126,8 +124,10 @@ describe('HelpTcpClient Class', () => {
     it('should get back a time response', (done) => {
       const client = new HelpTcpClient('localhost', '1', 'jhorlin');
       client.sendCommand('time')
-        .subscribe(() => {
-        }, (err) => {
+            .then(() => {
+              assert.fail('should throw');
+            })
+        .catch((err) => {
           assert.ok(err);
           done();
         });
@@ -172,8 +172,10 @@ describe('HelpTcpClient Class', () => {
     it('should timeout on count response', done => {
       const client = new HelpTcpClient('localhost', '1', 'jhorlin');
       client.sendCommand('count')
-        .subscribe(() => {
-        }, (err) => {
+            .then(() => {
+              assert.fail('should throw');
+            })
+        .catch((err) => {
           assert.equal(err.name, 'TimeoutError');
           done()
         });
@@ -182,8 +184,10 @@ describe('HelpTcpClient Class', () => {
     it('should timeout on time response', done => {
       const client = new HelpTcpClient('localhost', '1', 'jhorlin');
       client.sendCommand('time')
-        .subscribe(() => {
-        }, (err) => {
+            .then(() => {
+              assert.fail('should throw');
+            })
+        .catch((err) => {
           assert.equal(err.name, 'TimeoutError');
           done();
         });
@@ -225,27 +229,21 @@ describe('HelpTcpClient Class', () => {
       mitm.disable();
     });
 
-    it('should get back a count response', done => {
+    it('should get back a count response', () => {
       const client = new HelpTcpClient('localhost', '1', 'jhorlin');
-      client.sendCommand('count')
-        .subscribe((response) => {
+      return client.sendCommand('count')
+        .then((response) => {
           assert.ok(response);
           assert.equal('object', typeof response);
-          done();
-        }, (err) => {
-          done(err);
         });
     });
 
-    it('should get back a time response', done => {
+    it('should get back a time response', () => {
       const client = new HelpTcpClient('localhost', '1', 'jhorlin');
-      client.sendCommand('time')
-        .subscribe((response) => {
+      return client.sendCommand('time')
+        .then((response) => {
           assert.ok(response);
           assert.equal('object', typeof response);
-          done();
-        }, (err) => {
-          done(err);
         });
     });
   });
@@ -292,9 +290,13 @@ describe('HelpTcpClient Class', () => {
     it('should close a connection', () => {
       const instance = new HelpTcpClient('localhost', '1', 'hb');
       instance.close();
-      assert.throws(() => {
-        instance.sendCommand('time');
-      }, errors.ClientClosed);
+      return instance.sendCommand('time')
+      .then(() => {
+        assert.fail('should throw');
+      })
+      .catch((err) => {
+        assert.ok(err instanceof errors.ClientClosed);
+      })
     })
-  })
+  });
 });

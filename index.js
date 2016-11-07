@@ -7,7 +7,6 @@ const chalk = require('chalk');
 const clear = require('clear');
 const figlet = require('figlet');
 const inquirer = require('inquirer');
-const _ = require('lodash');
 
 const pkg = require('./package.json');
 const HelpeTcpClient = require('./lib/HelpTcpClient');
@@ -44,20 +43,21 @@ function helpUser(user) {
          client.close();
        } else {
          client.sendCommand(answers.command)
-           .subscribe((x) => {
-             console.log(chalk.green(JSON.stringify(x, null, 4)));
+           .then((response) => {
+             console.log(chalk.green(JSON.stringify(response, null, 4)));
              if (answers.command === 'time') {
-               const randomNumber = _.get(x, 'msg.random', 0);
+               // get random number and guard for missing property
+               const { msg: { random: randomNumber } = { random: 0 } } = response;
                if (randomNumber > 30) {
                  console.log(chalk.yellow(`Found random number greater than 30: ${randomNumber}`));
                }
              }
-           },
-         (err) => {
-           console.log(chalk.red(err.message));
-           ask();
-         },
-         () => ask());
+             ask();
+           })
+           .catch((err) => {
+             console.log(chalk.red(err.message));
+             ask();
+           })
        }
      });
   };
@@ -74,7 +74,7 @@ program
 
 program.parse(process.argv);
 
-if (_.isEmpty(program.args)) {
+if (Object.keys(program.args).length === 0) {
   console.error('Missing <user> argument.');
   program.outputHelp();
   process.exit(-1); // eslint-disable-line no-process-exit
